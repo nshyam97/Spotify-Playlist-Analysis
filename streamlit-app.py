@@ -1,17 +1,14 @@
+import streamlit as st
+import credentials as se
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import pandas
-from credentials import *
 from datetime import datetime
-
-pandas.options.display.max_columns = 50
-pandas.options.display.max_colwidth = 100
-pandas.options.display.width = 500
 
 
 def authorise():
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID, client_secret=CLIENT_SECRET,
-                                                   redirect_uri=REDIRECT_URI, scope='user-library-read'))
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=se.CLIENT_ID, client_secret=se.CLIENT_SECRET,
+                                                   redirect_uri=se.REDIRECT_URI, scope='user-library-read'))
     return sp
 
 
@@ -64,3 +61,34 @@ def run_all():
     total_df = finalise_dfs(music_df, sp)
 
     return total_df
+
+
+total_df = run_all()
+
+st.markdown(
+        f"""
+<style>
+    .reportview-container .main .block-container{{
+        max-width: 1500px;
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+for i in range(len(total_df)):
+    cols = st.beta_columns(2)
+    cols[0].markdown(f'![Test] ({total_df.Album_Images[i]})')
+    cols[1].header(total_df.Track_Name[i] + ' - ' + ', '.join(total_df.Artist_Names[i]))
+    my_expander = cols[1].beta_expander("Song details", expanded=False)
+    with my_expander:
+        st.write('Song duration - ' + str(round(total_df.duration_mins[i], 2)) + ' mins')
+        st.write('Danceability - ' + str(round(total_df.danceability[i], 2)))
+        st.write('Energy - ' + str(round(total_df.energy[i], 2)))
+        st.write('Key - ' + str(round(total_df.key[i], 2)))
+        st.write('Loudness - ' + str(round(total_df.loudness[i], 2)))
+        st.write('Mode - ' + str(total_df['mode'][i]))
+        st.write('Speechiness - ' + str(round(total_df.speechiness[i], 2)))
+        st.write('Acousticness - ' + str(round(total_df.acousticness[i], 2)))
+        st.write('Instrumentalness - ' + str(round(total_df.instrumentalness[i], 2)))
+        st.write('Liveness - ' + str(round(total_df.liveness[i], 2)))
+        st.write('Valence - ' + str(round(total_df.valence[i], 2)))
+        st.write('Tempo - ' + str(round(total_df.tempo[i], 2)))
